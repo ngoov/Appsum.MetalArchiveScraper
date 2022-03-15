@@ -13,4 +13,4 @@ var scraper = sp.GetRequiredService<Scraper.Scraper>();
 
 await scraper.Run();
 
-Console.WriteLine("Hello, World!");
+Console.Read();

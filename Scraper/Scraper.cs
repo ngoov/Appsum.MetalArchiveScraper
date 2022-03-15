@@ -22,8 +22,8 @@ public class Scraper
         IHtmlDocument? document = await parser.ParseDocumentAsync(html);
         
         IHtmlCollection<IElement>? elements = document.QuerySelectorAll(".album-title-row > .album-title .megatitle");
-
-        var albums = elements.Select(el =>
+        List<Album> albums = new();
+        foreach (IElement el in elements)
         {
             var splitEl = parser.ParseFragment(el.InnerHtml, el).Where(x => x is IHtmlAnchorElement).Cast<IHtmlAnchorElement>().ToList();
             if (splitEl.Count != 2)
@@ -42,8 +42,14 @@ public class Scraper
             int albumId = int.Parse(albumUrl.QueryParams.First(x => x.Name == "album_id").Value.ToString() ?? throw new InvalidOperationException());
             string albumTitle = albumEl.Text;
 
-            return new Album(new MetalStormId(albumId), new AlbumTitle(albumTitle), band, albumUrl);
-        }).ToList();
+            var bandHtml = await _metalStormService.GetBandPageHtml(band.MetalStormId);
+
+            IHtmlDocument bandDocument = await parser.ParseDocumentAsync(bandHtml);
+            IHtmlCollection<IElement> genreEls = bandDocument.QuerySelectorAll("#page-content table table table tr:last-child");
+
+            albums.Add(new Album(new MetalStormId(albumId), new AlbumTitle(albumTitle), band, albumUrl));
+
+        }
         foreach (Album album in albums)
         {
             Console.WriteLine($"{album.Band.Name} - {album.Title}");
