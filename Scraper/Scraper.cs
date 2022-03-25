@@ -1,8 +1,14 @@
-﻿using AngleSharp.Dom;
+﻿using System.Text.RegularExpressions;
+
+using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 
 using Flurl;
+
+using MoreLinq.Extensions;
+
+using NodaTime;
 
 namespace Scraper;
 
@@ -46,13 +52,29 @@ public class Scraper
 
             IHtmlDocument bandDocument = await parser.ParseDocumentAsync(bandHtml);
             IHtmlCollection<IElement> genreEls = bandDocument.QuerySelectorAll("#page-content table table table tr:last-child");
-
+            foreach (IElement genreEl in genreEls)
+            {
+                var genreTableData = parser.ParseFragment(genreEl.InnerHtml, genreEl).Where(x => x is IHtmlTableDataCellElement).Select(x => x.TextContent.Trim()).ToList();
+                var yearsRegex = new Regex(@"(?<from>\d{4})-(?<to>\d{4})?");
+                List<List<string>> genreBatches = genreTableData.Batch(2).Select(x => x.ToList()).ToList();
+                foreach (List<string> genreBatch in genreBatches)
+                {
+                    Match genreDatesMatch = yearsRegex.Match(genreBatch[0]);
+                    Instant from = Instant.FromUtc(int.Parse(genreDatesMatch.Groups["from"].Value), 1, 1, 0, 0);
+                    Instant? to = !string.IsNullOrWhiteSpace(genreDatesMatch.Groups["to"].Value) ? Instant.FromUtc(int.Parse(genreDatesMatch.Groups["to"].Value), 1, 1, 0, 0) : null;
+                    band.AddGenre((Genre)genreBatch[1], from, to);
+                }
+            }
             albums.Add(new Album(new MetalStormId(albumId), new AlbumTitle(albumTitle), band, albumUrl));
 
         }
         foreach (Album album in albums)
         {
             Console.WriteLine($"{album.Band.Name} - {album.Title}");
+            foreach (BandGenre bandGenre in album.Band.BandGenres)
+            {
+                Console.WriteLine($"  - {bandGenre.Genre} ({bandGenre.From.InUtc().Year}-{bandGenre.To?.InUtc().Year.ToString() ?? "*"}");
+            }
         }
         Console.WriteLine("Done found");
     }
