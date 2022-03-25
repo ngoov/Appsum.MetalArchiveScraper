@@ -4,7 +4,11 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 
+using Data;
+
 using Flurl;
+
+using Microsoft.EntityFrameworkCore;
 
 using MoreLinq.Extensions;
 
@@ -15,20 +19,21 @@ namespace Scraper;
 public class Scraper
 {
     private readonly IMetalStormService _metalStormService;
+    private readonly MetalContext _metalContext;
 
-    public Scraper(IMetalStormService metalStormService)
+    public Scraper(IMetalStormService metalStormService, MetalContext metalContext)
     {
         _metalStormService = metalStormService;
+        _metalContext = metalContext;
     }
 
-    public async Task Run()
+    public async Task Run(CancellationToken cancellationToken = default)
     {
-        string html = await _metalStormService.GetNewReleasesPageHtml();
+        string html = await _metalStormService.GetNewReleasesPageHtml(cancellationToken);
         var parser = new HtmlParser();
         IHtmlDocument? document = await parser.ParseDocumentAsync(html);
         
         IHtmlCollection<IElement>? elements = document.QuerySelectorAll(".album-title-row > .album-title .megatitle");
-        List<Album> albums = new();
         foreach (IElement el in elements)
         {
             var splitEl = parser.ParseFragment(el.InnerHtml, el).Where(x => x is IHtmlAnchorElement).Cast<IHtmlAnchorElement>().ToList();
@@ -36,46 +41,73 @@ public class Scraper
             {
                 throw new HtmlParsingException($"Could not parse Album HTML element and split in 3 parts: {el.InnerHtml}");
             }
-
+            
+            IHtmlAnchorElement albumEl = splitEl[1];
+            var albumUrl = new Url(Url.Combine(MetalStormService.BaseUrl, albumEl.PathName, albumEl.Search));
+            int albumId = int.Parse(albumUrl.QueryParams.First(x => x.Name == "album_id").Value.ToString() ?? throw new InvalidOperationException());
+            Album? album = await _metalContext.Albums.FirstOrDefaultAsync(x => x.MetalStormId == albumId, cancellationToken: cancellationToken);
+            if (album != null)
+            {
+                // album already exists
+                continue;
+            }
+            
             IHtmlAnchorElement bandEl = splitEl[0];
             var bandUrl = new Url(Url.Combine(MetalStormService.BaseUrl, bandEl.PathName, bandEl.Search));
             int bandId = int.Parse(bandUrl.QueryParams.First(x => x.Name == "band_id").Value.ToString() ?? throw new InvalidOperationException());
             string bandName = bandEl.Text;
-            var band = new Band(new MetalStormId(bandId), bandName, bandUrl);
-
-            IHtmlAnchorElement albumEl = splitEl[1];
-            var albumUrl = new Url(Url.Combine(MetalStormService.BaseUrl, albumEl.PathName, albumEl.Search));
-            int albumId = int.Parse(albumUrl.QueryParams.First(x => x.Name == "album_id").Value.ToString() ?? throw new InvalidOperationException());
+            Band? band = await _metalContext.Bands.FirstOrDefaultAsync(x => x.MetalStormId == bandId, cancellationToken: cancellationToken);
+            if (band == null)
+            {
+                band = new Band(Guid.NewGuid(), new MetalStormId(bandId), bandName, bandUrl);
+                await _metalContext.Bands.AddAsync(band, cancellationToken);
+            }
+            
             string albumTitle = albumEl.Text;
-
-            var bandHtml = await _metalStormService.GetBandPageHtml(band.MetalStormId);
+            album = new Album(Guid.NewGuid(), new MetalStormId(albumId), new AlbumTitle(albumTitle), albumUrl);
+            band.AddAlbum(album);
+            
+            
+            string bandHtml = await _metalStormService.GetBandPageHtml(band.MetalStormId, cancellationToken);
 
             IHtmlDocument bandDocument = await parser.ParseDocumentAsync(bandHtml);
-            IHtmlCollection<IElement> genreEls = bandDocument.QuerySelectorAll("#page-content table table table tr:last-child");
-            foreach (IElement genreEl in genreEls)
+            IEnumerable<IElement> trEls = bandDocument.QuerySelectorAll("#page-content table table table tr").Reverse();
+            
+            foreach (IElement genreEl in trEls)
             {
-                var genreTableData = parser.ParseFragment(genreEl.InnerHtml, genreEl).Where(x => x is IHtmlTableDataCellElement).Select(x => x.TextContent.Trim()).ToList();
+                List<string> genreTableData = parser.ParseFragment(genreEl.InnerHtml, genreEl).Where(x => x is IHtmlTableDataCellElement).Select(x => x.TextContent.Trim()).ToList();
                 var yearsRegex = new Regex(@"(?<from>\d{4})-(?<to>\d{4})?");
                 List<List<string>> genreBatches = genreTableData.Batch(2).Select(x => x.ToList()).ToList();
                 foreach (List<string> genreBatch in genreBatches)
                 {
                     Match genreDatesMatch = yearsRegex.Match(genreBatch[0]);
+                    if (!genreDatesMatch.Success)
+                    {
+                        break;
+                    }
                     Instant from = Instant.FromUtc(int.Parse(genreDatesMatch.Groups["from"].Value), 1, 1, 0, 0);
                     Instant? to = !string.IsNullOrWhiteSpace(genreDatesMatch.Groups["to"].Value) ? Instant.FromUtc(int.Parse(genreDatesMatch.Groups["to"].Value), 1, 1, 0, 0) : null;
-                    band.AddGenre((Genre)genreBatch[1], from, to);
+                    Genre? genre = await _metalContext.Genres.FirstOrDefaultAsync(x => x.Name.ToUpper() == genreBatch[1].ToUpper(), cancellationToken: cancellationToken);
+                    if (genre == null)
+                    {
+                        genre = new Genre(Guid.NewGuid(), genreBatch[1]);
+                        await _metalContext.Genres.AddAsync(genre, cancellationToken);
+                    }
+                    band.AddGenre(genre, from, to);
                 }
             }
-            albums.Add(new Album(new MetalStormId(albumId), new AlbumTitle(albumTitle), band, albumUrl));
+        }
+        // foreach (Album album in albums)
+        // {
+        //     Console.WriteLine($"{album.Band.Name} - {album.Title}");
+        //     foreach (BandGenre bandGenre in album.Band.BandGenres)
+        //     {
+        //         Console.WriteLine($"  - {bandGenre.Genre} ({bandGenre.From.InUtc().Year}-{bandGenre.To?.InUtc().Year.ToString() ?? "*"})");
+        //     }
+        // }
 
-        }
-        foreach (Album album in albums)
-        {
-            Console.WriteLine($"{album.Band.Name} - {album.Title}");
-            foreach (BandGenre bandGenre in album.Band.BandGenres)
-            {
-                Console.WriteLine($"  - {bandGenre.Genre} ({bandGenre.From.InUtc().Year}-{bandGenre.To?.InUtc().Year.ToString() ?? "*"}");
-            }
-        }
+        await _metalContext.SaveChangesAsync(cancellationToken);
+
         Console.WriteLine("Done found");
     }
     /*

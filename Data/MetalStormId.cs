@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 
-namespace Scraper;
+namespace Data;
 
 public class MetalStormId : ValueObject
 {

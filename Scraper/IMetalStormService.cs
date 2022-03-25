@@ -1,4 +1,6 @@
-﻿namespace Scraper;
+﻿using Data;
+
+namespace Scraper;
 
 public interface IMetalStormService
 {

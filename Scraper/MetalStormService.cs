@@ -1,3 +1,5 @@
+using Data;
+
 namespace Scraper;
 
 public sealed class MetalStormService : IMetalStormService

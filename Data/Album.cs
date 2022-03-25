@@ -1,18 +1,16 @@
 ﻿using Flurl;
 
-namespace Scraper;
+namespace Data;
 
-public class Album
+public class Album : Entity
 {
     public AlbumTitle Title { get; }
-    public Band Band { get; }
     public MetalStormId MetalStormId { get; }
     public Url Url { get; }
 
-    public Album(MetalStormId metalStormId, AlbumTitle title, Band band, Url url)
+    public Album(Guid id, MetalStormId metalStormId, AlbumTitle title, Url url) : base(id)
     {
         Title = title;
-        Band = band;
         Url = url;
         MetalStormId = metalStormId;
     }   

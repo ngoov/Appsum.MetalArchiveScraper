@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scraper", "Scraper\Scraper.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Console\Console.csproj", "{559FDBB3-C5C9-4868-ABE9-4921B27D9A99}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{C331FC57-3AC6-4D8B-BF78-04E9E3F0D63A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{559FDBB3-C5C9-4868-ABE9-4921B27D9A99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{559FDBB3-C5C9-4868-ABE9-4921B27D9A99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{559FDBB3-C5C9-4868-ABE9-4921B27D9A99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C331FC57-3AC6-4D8B-BF78-04E9E3F0D63A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C331FC57-3AC6-4D8B-BF78-04E9E3F0D63A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C331FC57-3AC6-4D8B-BF78-04E9E3F0D63A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C331FC57-3AC6-4D8B-BF78-04E9E3F0D63A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
