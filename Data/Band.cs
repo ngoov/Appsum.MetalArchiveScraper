@@ -23,7 +23,10 @@ public class Band : Entity
 
     public void AddGenre(Genre genre, Instant from, Instant? to)
     {
-        _bandGenres.Add(new BandGenre(Guid.NewGuid(),this, genre, from, to));
+        if (_bandGenres.All(x => x.Genre.Id != genre.Id))
+        {
+            _bandGenres.Add(new BandGenre(Guid.NewGuid(), this, genre, from, to));
+        }
     }
     public void AddAlbum(Album album)
     {
