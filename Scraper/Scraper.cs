@@ -67,20 +67,21 @@ public class Scraper
                 {
                     band = new Band(Guid.NewGuid(), new MetalStormId(bandId), bandName, bandUrl);
                     await _metalContext.Bands.AddAsync(band, cancellationToken);
-                    await _metalContext.SaveChangesAsync(cancellationToken);
+                }
+                else
+                {
+                    _metalContext.Bands.Update(band);
                 }
 
                 string albumTitle = albumEl.Text;
                 album = new Album(Guid.NewGuid(), new MetalStormId(albumId), new AlbumTitle(albumTitle), albumUrl);
                 await _metalContext.Albums.AddAsync(album, cancellationToken);
-                await _metalContext.SaveChangesAsync(cancellationToken);
                 band.AddAlbum(album);
 
                 string bandHtml = await _metalStormService.GetBandPageHtml(band.MetalStormId, cancellationToken);
 
                 IHtmlDocument bandDocument = await parser.ParseDocumentAsync(bandHtml);
                 IEnumerable<IElement> trEls = bandDocument.QuerySelectorAll("#page-content table table table tr").Reverse();
-                await _metalContext.SaveChangesAsync(cancellationToken);
                 foreach (IElement genreEl in trEls)
                 {
                     List<string> genreTableData = parser.ParseFragment(genreEl.InnerHtml, genreEl).Where(x => x is IHtmlTableDataCellElement).Select(x => x.TextContent.Trim()).ToList();
@@ -101,16 +102,12 @@ public class Scraper
                         {
                             genre = new Genre(Guid.NewGuid(), genreBatch[1]);
                             await _metalContext.Genres.AddAsync(genre, cancellationToken);
-                            await _metalContext.SaveChangesAsync(cancellationToken);
                         }
                         band.AddGenre(genre, from, to);
                     }
                 }
-                _metalContext.Update(band);
                 await _metalContext.SaveChangesAsync(cancellationToken);
-                
             }
-            await _metalContext.SaveChangesAsync(cancellationToken);
             page++;
         }
         // foreach (Album album in albums)
