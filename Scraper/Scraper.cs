@@ -33,6 +33,7 @@ public class Scraper
     {
         // await using IDbContextTransaction transaction = await _metalContext.Database.BeginTransactionAsync(cancellationToken);
         var page = 1;
+        await _metalStormService.PostStudioFilterOnReleasesPageHtml(cancellationToken);
         while (page <= MAX_PAGES)
         {
             string html = await _metalStormService.GetNewReleasesPageHtml(page, cancellationToken);

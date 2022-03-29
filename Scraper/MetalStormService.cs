@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Data;
 
 namespace Scraper;
@@ -12,6 +15,16 @@ public sealed class MetalStormService : IMetalStormService
         _httpClient = httpClient;
 
         _httpClient.BaseAddress = new Uri(BaseUrl);
+    }
+
+    public async Task PostStudioFilterOnReleasesPageHtml(CancellationToken cancellationToken = default)
+    {
+        var data = new[]
+        {
+            new KeyValuePair<string, string>("filter_media_types[1]","1"),
+            new KeyValuePair<string, string>("filter_media_types_submit","Filter"),
+        } ;
+        await _httpClient.PostAsync("events/new_releases.php", new FormUrlEncodedContent(data), cancellationToken);
     }
 
     public async Task<string> GetNewReleasesPageHtml(int page, CancellationToken cancellationToken = default)
