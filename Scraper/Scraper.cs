@@ -36,6 +36,7 @@ public class Scraper
         await _metalStormService.PostStudioFilterOnReleasesPageHtml(cancellationToken);
         while (page <= MAX_PAGES)
         {
+            Console.WriteLine($"Processing page {page}...");
             string html = await _metalStormService.GetNewReleasesPageHtml(page, cancellationToken);
             var parser = new HtmlParser();
             IHtmlDocument? document = await parser.ParseDocumentAsync(html);
@@ -109,6 +110,7 @@ public class Scraper
                 }
                 await _metalContext.SaveChangesAsync(cancellationToken);
             }
+            Console.WriteLine($"Page {page} processed.");
             page++;
         }
         // foreach (Album album in albums)
