@@ -10,7 +10,7 @@ public class MetalContextDesignTimeFactory : IDesignTimeDbContextFactory<MetalCo
     public MetalContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<MetalContext>();
-        optionsBuilder.UseSqlite("Data Source=metal.db");
+        optionsBuilder.UseSqlite("Data Source=c:\\temp\\metal.db");
 
         return new MetalContext(optionsBuilder.Options);
     }
