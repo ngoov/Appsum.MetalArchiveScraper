@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using MoreLinq.Extensions;
 
 using NodaTime;
+using NodaTime.Text;
 
 namespace Scraper;
 
@@ -41,10 +43,13 @@ public class Scraper
             var parser = new HtmlParser();
             IHtmlDocument? document = await parser.ParseDocumentAsync(html);
 
-            IHtmlCollection<IElement>? elements = document.QuerySelectorAll(".album-title-row > .album-title .megatitle");
+            IHtmlCollection<IElement>? elements = document.QuerySelectorAll(".album-title-row > .album-title");
             foreach (IElement el in elements)
             {
-                List<IHtmlAnchorElement> splitEl = parser.ParseFragment(el.InnerHtml, el).Where(x => x is IHtmlAnchorElement).Cast<IHtmlAnchorElement>().ToList();
+                List<IHtmlElement> elNodes = parser.ParseFragment(el.InnerHtml, el).Where(x => x is IHtmlElement).Cast<IHtmlElement>().ToList();
+                IHtmlElement? titleEl = elNodes.FirstOrDefault(x => x.TagName.ToLower() == TagNames.Span && x.ClassList.Any(c => c == "megatitle"));
+                IHtmlElement? releaseDateEl = elNodes.LastOrDefault(x => x.TagName.ToLower() == TagNames.Span);
+                List<IHtmlAnchorElement> splitEl = parser.ParseFragment(titleEl?.InnerHtml, titleEl).Where(x => x is IHtmlAnchorElement).Cast<IHtmlAnchorElement>().ToList();
                 if (splitEl.Count != 2)
                 {
                     throw new HtmlParsingException($"Could not parse Album HTML element and split in 3 parts: {el.InnerHtml}");
@@ -76,7 +81,8 @@ public class Scraper
                 }
 
                 string albumTitle = albumEl.Text;
-                album = new Album(Guid.NewGuid(), new MetalStormId(albumId), new AlbumTitle(albumTitle), albumUrl);
+                Instant releaseDate = InstantPattern.Create("d MMMM yyyy", new CultureInfo("en-US")).Parse(releaseDateEl.Text()).Value;
+                album = new Album(Guid.NewGuid(), new MetalStormId(albumId), new AlbumTitle(albumTitle), albumUrl, releaseDate);
                 await _metalContext.Albums.AddAsync(album, cancellationToken);
                 band.AddAlbum(album);
 

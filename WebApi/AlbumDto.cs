@@ -6,6 +6,7 @@ public sealed class AlbumDto
 {
     public Guid Id { get; set; }
     public string Title { get; set; }
+    public Instant ReleaseDate { get; set; }
 }
 
 public sealed class BandDto

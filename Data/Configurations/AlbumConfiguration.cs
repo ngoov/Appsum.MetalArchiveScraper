@@ -13,5 +13,6 @@ public class AlbumConfiguration : IEntityTypeConfiguration<Album>
         builder.Property(x => x.MetalStormId).HasConversion(x => x.Value, x => new MetalStormId(x));
         builder.Property(x => x.Title).HasConversion(x => x.Value, x => new AlbumTitle(x));
         builder.Property(x => x.Url).HasConversion(x => x.ToString(), x => Url.Parse(x));
+        builder.Property(x => x.ReleaseDate);
     }
 }
