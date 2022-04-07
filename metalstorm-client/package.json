@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "axios": "^0.26.1",
+    "ky-universal": "^0.10.1",
     "next": "12.1.4",
     "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "react-dom": "18.0.0",
+    "react-query": "^4.0.0-beta.1"
   },
   "devDependencies": {
     "@types/node": "17.0.23",
