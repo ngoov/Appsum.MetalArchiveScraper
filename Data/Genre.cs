@@ -8,5 +8,7 @@ public sealed class Genre : Entity
     }
     public string Name { get; }
 
+    public ICollection<BandGenre> BandGenres { get; }
+
     public override string ToString() => Name;
 }
