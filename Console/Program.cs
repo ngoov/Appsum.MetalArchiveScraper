@@ -2,7 +2,6 @@
 
 using Data;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using Scraper;
@@ -16,5 +15,3 @@ ServiceProvider sp = services.BuildServiceProvider();
 var scraper = sp.GetRequiredService<Scraper.Scraper>();
 
 await scraper.Run();
-
-Console.Read();

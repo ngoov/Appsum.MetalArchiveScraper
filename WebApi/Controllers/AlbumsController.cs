@@ -20,7 +20,11 @@ public class AlbumsController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken = default) 
-        => Ok(await _metalContext.Bands.Include(x => x.Albums).Include(x => x.BandGenres).ThenInclude(x => x.Genre).Select(band => new BandDto
+        => Ok(await _metalContext.Bands
+                                 .Include(x => x.Albums)
+                                 .Include(x => x.BandGenres)
+                                 .ThenInclude(x => x.Genre)
+                                 .Select(band => new BandDto
         {
             Id = band.Id,
             Albums = band.Albums.Select(album => new AlbumDto
