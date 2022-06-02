@@ -1,20 +1,16 @@
 import axios from "axios";
 import type { NextPage } from "next";
 import Head from "next/head";
-import { useEffect, useState } from "react";
-
-interface Album {
-    id: number;
-    name: string;
-}
+import Link from "next/link";
+import { useGenres } from "../hooks/albums/useGenres";
+import { GenreDto } from "./dtos";
 
 const Home: NextPage = () => {
     axios.defaults.baseURL = "https://localhost:7272/api";
-    const [albums, setAlbums] = useState([]);
-    useEffect(() => {
-        axios.get("/Albums").then((resp) => setAlbums(resp.data));
-    });
-
+    const { data: genres, isLoading } = useGenres();
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
     return (
         <div>
             <Head>
@@ -25,11 +21,30 @@ const Home: NextPage = () => {
                 />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <ul>
-                {albums.map((album: Album) => (
-                    <li key={album.id}>{album.name}</li>
-                ))}
-            </ul>
+            <div
+                style={{
+                    display: "grid",
+                    gridAutoFlow: "column",
+                    gridTemplateRows: "repeat(50, 1fr)",
+                }}
+            >
+                {genres
+                    .sort(
+                        (a: GenreDto, b: GenreDto) => b.bandCount - a.bandCount
+                    )
+                    .map((genre: GenreDto) => (
+                        <span key={genre.id}>
+                            <Link
+                                href={`/bands?genre=${genre.id}`}
+                                key={genre.id}
+                            >
+                                <a>
+                                    {genre.name} ({genre.bandCount})
+                                </a>
+                            </Link>
+                        </span>
+                    ))}
+            </div>
         </div>
     );
 };
