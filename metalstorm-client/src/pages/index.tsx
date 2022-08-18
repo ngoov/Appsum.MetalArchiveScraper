@@ -23,9 +23,10 @@ const Home: NextPage = () => {
             </Head>
             <div
                 style={{
+                    fontFamily: "Verdana",
                     display: "grid",
                     gridAutoFlow: "column",
-                    gridTemplateRows: "repeat(50, 1fr)",
+                    gridTemplateRows: "repeat(25, 1fr)",
                 }}
             >
                 {genres
@@ -33,12 +34,21 @@ const Home: NextPage = () => {
                         (a: GenreDto, b: GenreDto) => b.bandCount - a.bandCount
                     )
                     .map((genre: GenreDto) => (
-                        <span key={genre.id}>
+                        <span
+                            key={genre.id}
+                            style={{
+                                padding: ".2rem 0",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                wordBreak: "break-all",
+                                textOverflow: "ellipsis",
+                            }}
+                        >
                             <Link
                                 href={`/bands?genre=${genre.id}`}
                                 key={genre.id}
                             >
-                                <a>
+                                <a title={`${genre.name} (${genre.bandCount})`}>
                                     {genre.name} ({genre.bandCount})
                                 </a>
                             </Link>
@@ -50,3 +60,15 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+// export const getStaticProps: GetStaticProps = async () => {
+//     const queryClient = new QueryClient();
+
+//     await queryClient.prefetchQuery(["albums"], () => fetchAlbums());
+
+//     return {
+//         props: {
+//             dehydratedState: dehydrate(queryClient),
+//         },
+//     };
+// };

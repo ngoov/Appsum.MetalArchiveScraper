@@ -19,27 +19,32 @@ public class AlbumsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken = default) 
-        => Ok(await _metalContext.Bands
-                                 .Include(x => x.Albums)
-                                 .Include(x => x.BandGenres)
-                                 .ThenInclude(x => x.Genre)
-                                 .Select(band => new BandDto
-        {
-            Id = band.Id,
-            Albums = band.Albums.Select(album => new AlbumDto
-            {
-                Id = album.Id,
-                Title = album.Title
-            }).ToList(),
-            Name = band.Name,
-            Genres = band.BandGenres.Select(bandGenre => new GenreDto
-            {
-                Id = bandGenre.Genre.Id,
-                Name = bandGenre.Genre.Name,
-                FromDate = bandGenre.From,
-                ToDate = bandGenre.To
-            }).ToList()
-        }).ToListAsync(cancellationToken));
-
+    public async Task<IActionResult> Get(CancellationToken cancellationToken = default)
+    {
+        List<BandDto> bands = await _metalContext.Bands
+                                                     .Include(x => x.Albums)
+                                                     // .Include(x => x.BandGenres)
+                                                     // .ThenInclude(x => x.Genre)
+                                                     .Select(band => new BandDto
+                                                     {
+                                                         Id = band.Id,
+                                                         Albums = band.Albums.Select(album => new AlbumDto
+                                                                      {
+                                                                          Id = album.Id,
+                                                                          Title = album.Title
+                                                                      })
+                                                                      .ToList(),
+                                                         Name = band.Name,
+                                                         // Genres = band.BandGenres.Select(bandGenre => new GenreDto
+                                                         //              {
+                                                         //                  Id = bandGenre.Genre.Id,
+                                                         //                  Name = bandGenre.Genre.Name,
+                                                         //                  FromDate = bandGenre.From,
+                                                         //                  ToDate = bandGenre.To
+                                                         //              })
+                                                         //              .ToList()
+                                                     })
+                                                     .ToListAsync(cancellationToken);
+        return Ok(bands);
+    }
 }

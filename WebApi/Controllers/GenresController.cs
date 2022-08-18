@@ -32,9 +32,7 @@ public class GenresController : ControllerBase
     [HttpGet("{id:guid}/bands")]
     public async Task<IActionResult> GetBands(Guid id, CancellationToken cancellationToken = default) 
         => Ok(await _metalContext.BandGenres
-                                 .AsSplitQuery()
                                  .Include(x => x.Band)
-                                 .Include(x => x.Genre)
                                  .AsNoTracking()
                                  .Where(x => x.Genre.Id == id)
                                  .Select(genre =>

@@ -6,7 +6,7 @@ const fetchAlbums = async (_limit = 10) => {
     return result.data;
 };
 
-const useAlbums = (limit: number = 10) => {
+const useAlbums = (limit = 10) => {
     return useQuery(["albums", limit], () => fetchAlbums(limit));
 };
 

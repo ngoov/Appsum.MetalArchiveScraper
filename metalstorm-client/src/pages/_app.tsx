@@ -9,8 +9,8 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
         <QueryClientProvider client={queryClient}>
             <Hydrate state={pageProps.dehydratedState}>
                 <Component {...pageProps} />
+                <ReactQueryDevtools initialIsOpen={false} />
             </Hydrate>
-            <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 };
