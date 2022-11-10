@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { useGenres } from "../hooks/albums/useGenres";
-import { GenreDto } from "./dtos";
+import { GenreDto } from "../dtos";
 
 const Home: NextPage = () => {
     axios.defaults.baseURL = "https://localhost:7272/api";
@@ -21,6 +21,7 @@ const Home: NextPage = () => {
                 />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
+            <input type="number" />
             <div
                 style={{
                     fontFamily: "Verdana",
@@ -47,10 +48,9 @@ const Home: NextPage = () => {
                             <Link
                                 href={`/bands?genre=${genre.id}`}
                                 key={genre.id}
+                                title={`${genre.name} (${genre.bandCount})`}
                             >
-                                <a title={`${genre.name} (${genre.bandCount})`}>
-                                    {genre.name} ({genre.bandCount})
-                                </a>
+                                {genre.name} ({genre.bandCount})
                             </Link>
                         </span>
                     ))}
