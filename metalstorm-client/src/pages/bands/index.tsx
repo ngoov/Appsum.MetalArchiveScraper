@@ -1,8 +1,8 @@
 import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { BandDto } from "../../dtos";
 import { useGetBandsByGenreId } from "../../hooks/bands/useBands";
-import { BandDto } from "../dtos";
 
 const Index: NextPage = () => {
     const router = useRouter();
@@ -15,11 +15,7 @@ const Index: NextPage = () => {
     return (
         <div>
             <h1>
-                Bands (
-                <Link href={"/"}>
-                    <a>Back</a>
-                </Link>
-                )
+                Bands (<Link href={"/"}>Back</Link>)
             </h1>
             <div
                 style={{

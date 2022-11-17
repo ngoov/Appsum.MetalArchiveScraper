@@ -1,7 +1,11 @@
 import type { AppProps } from "next/app";
-import { Hydrate, QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from "react-query/devtools";
+import {
+    Hydrate,
+    QueryClient,
+    QueryClientProvider,
+} from "@tanstack/react-query";
 import { useState } from "react";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
     const [queryClient] = useState(() => new QueryClient());

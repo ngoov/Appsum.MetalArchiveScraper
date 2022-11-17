@@ -1,6 +1,6 @@
 import axios from "axios";
-import { useQuery } from "react-query";
-import { BandDto } from "../../pages/dtos";
+import { useQuery } from "@tanstack/react-query";
+import { BandDto } from "../../dtos";
 
 const fetchBands = async (_limit = 10) => {
     const result = await axios.get("https://localhost:7272/api/bands");
@@ -15,7 +15,7 @@ const getBandsByGenreId = async (genreId: string) => {
     );
 };
 
-const useBands = (limit: number = 10) => {
+const useBands = (limit = 10) => {
     return useQuery(["bands", limit], () => fetchBands(limit));
 };
 const useGetBandsByGenreId = (genreId: string) => {
