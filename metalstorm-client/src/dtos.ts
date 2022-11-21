@@ -1,6 +1,7 @@
 interface BandDto {
     id: string;
     name: string;
+    newestAlbumDate: string;
     albums: [];
     genres: [];
 }
@@ -8,6 +9,7 @@ interface BandDto {
 interface AlbumDto {
     id: string;
     name: string;
+    releaseDate: Date;
 }
 interface GenreDto {
     id: string;

@@ -33,6 +33,7 @@ public class GenresController : ControllerBase
     public async Task<IActionResult> GetBands(Guid id, CancellationToken cancellationToken = default) 
         => Ok(await _metalContext.BandGenres
                                  .Include(x => x.Band)
+                                 .ThenInclude(x => x.Albums)
                                  .AsNoTracking()
                                  .Where(x => x.Genre.Id == id)
                                  .Select(genre =>
@@ -40,6 +41,7 @@ public class GenresController : ControllerBase
                                                                                {
                                                                                    Id = genre.Band.Id,
                                                                                    Name = genre.Band.Name,
+                                                                                   NewestAlbumDate = genre.Band.Albums.OrderByDescending(x => x.ReleaseDate).First().ReleaseDate
                                                                                }
               ).ToListAsync(cancellationToken));
 }

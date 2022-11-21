@@ -1,4 +1,5 @@
-﻿using NodaTime;
+﻿using Data;
+using NodaTime;
 
 namespace WebApi;
 
@@ -15,6 +16,7 @@ public sealed class BandDto
     public string Name { get; set; }
     public ICollection<AlbumDto> Albums { get; set; }
     public ICollection<GenreDto> Genres { get; set; }
+    public Instant NewestAlbumDate { get; set; }
 }
 
 public sealed class GenreDto

@@ -1,3 +1,4 @@
+import { format } from "date-fns";
 import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -25,7 +26,10 @@ const Index: NextPage = () => {
                 }}
             >
                 {bands.map((band: BandDto) => (
-                    <span key={band.id}>{band.name}</span>
+                    <span key={band.id}>
+                        {band.name} (
+                        {format(new Date(band.newestAlbumDate), "yyyy-MM-dd")})
+                    </span>
                 ))}
             </div>
         </div>

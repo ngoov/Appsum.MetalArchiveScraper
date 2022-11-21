@@ -31,7 +31,8 @@ public class AlbumsController : ControllerBase
                                                          Albums = band.Albums.Select(album => new AlbumDto
                                                                       {
                                                                           Id = album.Id,
-                                                                          Title = album.Title
+                                                                          Title = album.Title,
+                                                                          ReleaseDate = album.ReleaseDate
                                                                       })
                                                                       .ToList(),
                                                          Name = band.Name,
